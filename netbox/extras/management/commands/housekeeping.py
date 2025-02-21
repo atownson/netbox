@@ -71,7 +71,7 @@ class Command(BaseCommand):
             if options['verbosity'] >= 2:
                 self.stdout.write(f"\tRetention period: {config.JOB_RETENTION} days")
                 self.stdout.write(f"\tCut-off time: {cutoff}")
-            expired_records = Job.objects.filter(created__lt=cutoff).count()
+            expired_records = Job.objects.defer('data').filter(created__lt=cutoff).count()
             if expired_records:
                 if options['verbosity']:
                     self.stdout.write(
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                         ending=""
                     )
                     self.stdout.flush()
-                Job.objects.filter(created__lt=cutoff).delete()
+                Job.objects.defer('data').filter(created__lt=cutoff).delete()
                 if options['verbosity']:
                     self.stdout.write("Done.", self.style.SUCCESS)
             elif options['verbosity']:
